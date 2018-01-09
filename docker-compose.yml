@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  nextcloud:
+    image: nextcloud
+    container_name: nextcloud
+    restart: always
+    depends_on: 
+      - mysql_db
+    volumes:
+      - /data/nextcloud:/var/www/html
+    networks:
+      - web
+    links:
+      - mysql_db
+    labels:
+      - "traefik.backend=nextcloud"
+      - "traefik.frontend.rule=Host:nextcloud.pixhub.fr"
+
+  mysql_db:
+    image: percona/percona-server
+    container_name: mysql_db
+    restart: always
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - /data/mysql:/var/lib/mysql
+    expose:
+      - "3306"
+    networks:
+      - web
+    labels:
+      - "traefik.enable=false"
+
+networks:
+  web:
+    external:
+      name: traefik_webgateway
